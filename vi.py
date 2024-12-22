@@ -18,7 +18,6 @@ data = {
     'Season': ['2024', '2024', '2024', '2024'],
 }
 
-
 df = pd.DataFrame(data)
 
 # Helper function to create Matplotlib plots and return as an image
@@ -26,13 +25,19 @@ def create_matplotlib_figure(selected_team, selected_metric):
     # Filter data for the selected team
     filtered_df = df[df['Team'] == selected_team]
 
-    # Create the Matplotlib figure
-    plt.figure(figsize=(8, 5))
-    plt.bar(filtered_df['Player'], filtered_df[selected_metric], color='skyblue')
-    plt.title(f'{selected_metric} for {selected_team}', fontsize=16)
-    plt.xlabel('Player', fontsize=14)
-    plt.ylabel(selected_metric, fontsize=14)
-    plt.tight_layout()
+    if filtered_df.empty:
+        # If no data, create a placeholder plot
+        plt.figure(figsize=(8, 5))
+        plt.text(0.5, 0.5, 'No Data Available', fontsize=16, ha='center', va='center')
+        plt.axis('off')
+    else:
+        # Create the Matplotlib figure
+        plt.figure(figsize=(8, 5))
+        plt.bar(filtered_df['Player'], filtered_df[selected_metric], color='skyblue')
+        plt.title(f'{selected_metric} for {selected_team}', fontsize=16)
+        plt.xlabel('Player', fontsize=14)
+        plt.ylabel(selected_metric, fontsize=14)
+        plt.tight_layout()
 
     # Save the plot to a BytesIO object
     buf = io.BytesIO()
@@ -53,7 +58,7 @@ app.layout = html.Div([
     dcc.Dropdown(
         id='team-dropdown',
         options=[{'label': team, 'value': team} for team in df['Team'].unique()],
-        value='Team 1',
+        value=df['Team'].unique()[0],  # Default to the first team
         clearable=False
     ),
 
@@ -66,7 +71,7 @@ app.layout = html.Div([
             {'label': 'Assists', 'value': 'Assists'},
             {'label': 'Win Rate (%)', 'value': 'Win Rate (%)'}
         ],
-        value='Goals Scored',
+        value='Goals Scored',  # Default to "Goals Scored"
         clearable=False
     ),
 
